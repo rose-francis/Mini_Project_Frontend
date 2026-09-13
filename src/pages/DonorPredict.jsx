@@ -14,16 +14,9 @@ import { useAppTheme } from '../../src/Theme/ThemeContext';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { Dropdown } from 'react-native-element-dropdown';
-
-const API_URL = 'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1';
-const API_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE';
-
-const HEADERS = {
-  apikey: API_KEY,
-  Authorization: `Bearer ${API_KEY}`,
-  'Content-Type': 'application/json',
-};
+import DonorTabs from '../components/DonorTabs.jsx';
+import PatientDetailsSection from '../components/PatientDetailsSection.jsx';
+import { SUPABASE_REST_URL as API_URL, SUPABASE_HEADERS as HEADERS, BACKEND_URL } from '../config/api';
 
 const FIELD_META = {
   Name:       {label: 'FULL NAME' },
@@ -67,62 +60,9 @@ const POST_RELAPSE_OPTIONS = [
   { label: 'No',  value: 'no' },
 ];
 
-// ─── Detail Card ────────────────────────────────────────────────────────────
-const DetailCard = ({ label, value, colors, delay }) => {
-  const fadeAnim  = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(18)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim,  { toValue: 1, duration: 400, delay, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 350, delay, useNativeDriver: true }),
-    ]).start();
-  }, []);
-
-  return (
-    <Animated.View
-      style={[
-        styles.detailCard,
-        {
-          backgroundColor: colors.card,
-          borderColor: colors.border,
-          opacity: fadeAnim,
-          transform: [{ translateY: slideAnim }],
-        },
-      ]}
-    >
-      <View style={styles.detailTextGroup}>
-        <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>{label}</Text>
-        <Text style={[styles.detailValue, { color: colors.text }]}>{value || '—'}</Text>
-      </View>
-    </Animated.View>
-  );
-};
-
-// ─── HLA Row ─────────────────────────────────────────────────────────────────
-const HlaRow = ({ label, val1, val2, colors }) => (
-  <View style={[styles.hlaRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
-    <Text style={[styles.hlaLabel, { color: colors.textSecondary }]}>{label}</Text>
-    <View style={styles.hlaValues}>
-      <View style={[styles.hlaPill, { backgroundColor: colors.primary + '14', borderColor: colors.primary + '30' }]}>
-        <Text style={[styles.hlaPillText, { color: colors.text }]}>{val1 || '—'}</Text>
-      </View>
-      <View style={[styles.hlaSep, { backgroundColor: colors.border }]} />
-      <View style={[styles.hlaPill, { backgroundColor: colors.primary + '14', borderColor: colors.primary + '30' }]}>
-        <Text style={[styles.hlaPillText, { color: colors.text }]}>{val2 || '—'}</Text>
-      </View>
-    </View>
-  </View>
-);
-
 // ─── Section Label ───────────────────────────────────────────────────────────
 const SectionLabel = ({ text, colors }) => (
   <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>{text}</Text>
-);
-
-// ─── Divider ─────────────────────────────────────────────────────────────────
-const Divider = ({ colors }) => (
-  <View style={[styles.divider, { backgroundColor: colors.border }]} />
 );
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
@@ -137,8 +77,32 @@ export default function DonorPredict() {
   const [riskGroup,    setRiskGroup]    = useState('');
   const [postRelapse,  setPostRelapse]  = useState('');
   const [loading,      setLoading]      = useState(false);
-
-  const BACKEND_URL = "http://192.168.66.33:8000";
+  const [donors, setDonors] = useState([]);
+  const [loadingDonors, setLoadingDonors] = useState(true);
+  
+  
+  useEffect(() => {
+    const fetchDonors = async () => {
+      try {
+        const res = await fetch(
+          `${API_URL}/Patient-Donor?Patient_id=eq.${patient.Patient_id}`,
+          {
+            headers: HEADERS,
+          }
+        );
+  
+        const data = await res.json();
+        console.log("DATAAAAAAA: ",data)
+        setDonors(data || []);
+      } catch (err) {
+        console.error('Error fetching donors:', err);
+      } finally {
+        setLoadingDonors(false);
+      }
+    };
+  
+    fetchDonors();
+  }, []);
 
   useEffect(() => {
   setDiseaseType(patient.DiseaseType || '');
@@ -267,34 +231,13 @@ export default function DonorPredict() {
         showsVerticalScrollIndicator={false}
       >
         {/* ── Personal Details ─────────────────────────────────────── */}
-        <SectionLabel text="PERSONAL DETAILS" colors={colors} />
-        <View style={styles.cardsWrap}>
-          {fields.map(f => (
-            <DetailCard
-              key={f.key}
-              label={f.label}
-              value={f.value}
-              colors={colors}
-              delay={f.delay}
-            />
-          ))}
-        </View>
-
-        {/* ── HLA Typing ───────────────────────────────────────────── */}
-        <SectionLabel text="HLA TYPING" colors={colors} />
-        <View style={styles.cardsWrap}>
-          {HLA_FIELD_META.map(({ key1, key2, label }) => (
-            <HlaRow
-              key={label}
-              label={label}
-              val1={patient[key1]}
-              val2={patient[key2]}
-              colors={colors}
-            />
-          ))}
-        </View>
-
-        <Divider colors={colors} />
+        <PatientDetailsSection
+          fields={fields}
+          patient={patient}
+          colors={colors}
+          HLA_FIELD_META={HLA_FIELD_META}
+          styles={styles}
+        />
 
         {/* ── Clinical Assessment ──────────────────────────────────── */}
         <SectionLabel text="CLINICAL ASSESSMENT" colors={colors} />
@@ -383,8 +326,17 @@ export default function DonorPredict() {
 
         </View>
 
+        {!loadingDonors && donors.length > 0 && (
+            <>
+              <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+                MATCHED DONORS
+              </Text>
+              <DonorTabs donors={donors} colors={colors} />
+            </>
+          )}
+
         {/* Submit */}
-        <TouchableOpacity
+        {!loadingDonors && donors.length === 0  && <TouchableOpacity
           style={[
             styles.submitBtn,
             { backgroundColor: loading ? colors.primary + '88' : colors.primary },
@@ -394,9 +346,9 @@ export default function DonorPredict() {
           disabled={loading}
         >
           <Text style={styles.submitText}>
-            {loading ? 'Saving...' : 'Save & Continue'}
+            {loading ? 'Saving...' : 'Predict Donor'}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity>}
 
       </ScrollView>
     </SafeAreaView>

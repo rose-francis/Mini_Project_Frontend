@@ -12,16 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../src/Theme/ThemeContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import DonorTabs from '../components/DonorTabs.jsx';
-
-const API_URL = 'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1';
-const API_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE';
-
-const HEADERS = {
-  apikey: API_KEY,
-  Authorization: `Bearer ${API_KEY}`,
-  'Content-Type': 'application/json',
-};
+import DiseaseResult from '../components/DiseaseResult.jsx';
+import { SUPABASE_REST_URL as API_URL, SUPABASE_HEADERS as HEADERS } from '../config/api';
 
 const DetailCard = ({ label, value, colors, delay }) => {
   const fade = useRef(new Animated.Value(0)).current;
@@ -74,6 +66,7 @@ export default function PatientDetail() {
   const route = useRoute();
   const { patient } = route.params;
    const [refreshing, setRefreshing] = useState(false);
+   const [predictions, setPredictions] = useState(null);
   
     const onRefresh = async () => {
       setRefreshing(true);
@@ -85,28 +78,28 @@ export default function PatientDetail() {
   const [loadingDonors, setLoadingDonors] = useState(true);
 
 
-useEffect(() => {
-  const fetchDonors = async () => {
-    try {
-      const res = await fetch(
-        `${API_URL}/Patient-Donor?Patient_id=eq.${patient.Patient_id}`,
-        {
-          headers: HEADERS,
-        }
-      );
+  useEffect(() => {
+    const fetchDonors = async () => {
+      try {
+        const res = await fetch(
+          `${API_URL}/Patient-Donor?Patient_id=eq.${patient.Patient_id}`,
+          {
+            headers: HEADERS,
+          }
+        );
 
-      const data = await res.json();
-      console.log("DATAAAAAAA: ",data)
-      setDonors(data || []);
-    } catch (err) {
-      console.error('Error fetching donors:', err);
-    } finally {
-      setLoadingDonors(false);
-    }
-  };
+        const data = await res.json();
+        console.log("DATAAAAAAA: ",data)
+        setDonors(data || []);
+      } catch (err) {
+        console.error('Error fetching donors:', err);
+      } finally {
+        setLoadingDonors(false);
+      }
+    };
 
-  fetchDonors();
-}, []);
+    fetchDonors();
+  }, []);
 
 
   const headerFade = useRef(new Animated.Value(0)).current;
@@ -221,14 +214,19 @@ useEffect(() => {
           <DetailCard label="HLA-DQB1" value={`${patient.Hla_dqb1_1 || '-'} / ${patient.Hla_dqb1_2 || '-'}`} colors={colors} />
         </View>
 
+        <DiseaseResult
+                  patientId={patient.Patient_id}
+                  //refreshKey={predictions}   // re-fetches whenever a new prediction is saved
+                />
+
  {!loadingDonors && donors.length > 0 && (
-  <>
-    <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-      MATCHED DONORS
-    </Text>
-    <DonorTabs donors={donors} colors={colors} />
-  </>
-)}
+    <>
+      <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+        MATCHED DONORS
+      </Text>
+      <DonorTabs donors={donors} colors={colors} />
+    </>
+  )}
       </ScrollView>
     </SafeAreaView>
   );

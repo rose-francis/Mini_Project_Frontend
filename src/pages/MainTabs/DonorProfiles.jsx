@@ -11,97 +11,148 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../Theme/ThemeContext';
+import { SUPABASE_REST_URL, SUPABASE_HEADERS as BASE_HEADERS } from '../../config/api';
 
 export default function DonorProfiles({ navigation }) {
   const { colors } = useAppTheme();
   const [donors, setDonors] = useState([]);
+  const [matchedDonorIds, setMatchedDonorIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  
-    const onRefresh = async () => {
-      setRefreshing(true);
-      await fetchDonors();
-      setRefreshing(false);
-    };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadAll();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
-    fetchDonors();
+    loadAll();
   }, []);
+
+  const loadAll = async () => {
+    // Run both fetches in parallel
+    const [donorData, matchedIds] = await Promise.all([
+      fetchDonors(),
+      fetchMatchedDonorIds(),
+    ]);
+    setDonors(donorData);
+    setMatchedDonorIds(new Set(matchedIds));
+    setLoading(false);
+  };
 
   const fetchDonors = async () => {
     try {
       const response = await fetch(
-        'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1/Donor?select=*',
-        {
-          headers: {
-          apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE',
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE',
-          'Content-Type': 'application/json',
-          Prefer: 'return=minimal',
-        },
-        }
+        `${SUPABASE_REST_URL}/Donor?select=*`,
+        { headers: BASE_HEADERS }
       );
-
-      const data = await response.json();
-      setDonors(data);
-      setLoading(false);
+      return await response.json();
     } catch (error) {
-      console.log(error);
-      setLoading(false);
+      console.log('Error fetching donors:', error);
+      return [];
     }
   };
 
-  
-  const DonorCard = ({ donor }) => (
-    <TouchableOpacity
-      style={[
-        styles.card,
-        { backgroundColor: colors.card, borderColor: colors.border },
-      ]}
-      onPress={() => navigation.navigate('DonorDetail', { 
-          donor: donor
-       })}
-      activeOpacity={0.8}
-    >
-      <View style={styles.rowTop}>
-        <View style={[styles.iconCircle, { backgroundColor: colors.primary + '15' }]}>
-          <Icon name="account-heart" size={26} color={colors.primary} />
+  const fetchMatchedDonorIds = async () => {
+    try {
+      const response = await fetch(
+        `${SUPABASE_REST_URL}/Patient-Donor?select=Donor_id`,
+        { headers: BASE_HEADERS }
+      );
+      const data = await response.json();
+      // Return array of Donor_ids that have at least one match
+      return data.map((entry) => entry.Donor_id).filter(Boolean);
+    } catch (error) {
+      console.log('Error fetching matched donor IDs:', error);
+      return [];
+    }
+  };
+
+  const DonorCard = ({ donor }) => {
+    const isMatched = matchedDonorIds.has(donor.Donor_id);
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.card,
+            // Green border if matched, normal border otherwise
+            borderColor: isMatched ? colors.success : colors.border,
+            borderWidth: isMatched ? 2 : 1,
+          },
+        ]}
+        onPress={() => navigation.navigate('DonorDetail', { donor })}
+        activeOpacity={0.8}
+      >
+        <View style={styles.rowTop}>
+          <View
+            style={[
+              styles.iconCircle,
+              { backgroundColor: colors.primary + '15' },
+            ]}
+          >
+            <Icon name="account-heart" size={26} color={colors.primary} />
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.name, { color: colors.text }]}>
+              {donor.Name}
+            </Text>
+            <Text style={[styles.idText, { color: colors.textSecondary }]}>
+              Donor ID: {donor.Donor_id}
+            </Text>
+          </View>
+
+          <View style={styles.rightBadges}>
+            {/* "Matched" chip — only shown when donor has a match */}
+            {isMatched && (
+              <View
+                style={[
+                  styles.matchedBadge,
+                  { backgroundColor: colors.success + '20' },
+                ]}
+              >
+                <Icon name="check-circle" size={12} color={colors.success} />
+                <Text style={[styles.matchedText, { color: colors.success }]}>
+                  Matched
+                </Text>
+              </View>
+            )}
+
+            <View
+              style={[
+                styles.bloodBadge,
+                { backgroundColor: colors.success + '20' },
+              ]}
+            >
+              <Text style={[styles.bloodText, { color: colors.success }]}>
+                {donor.BloodGroup}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.name, { color: colors.text }]}>
-            {donor.Name}
-          </Text>
-          <Text style={[styles.idText, { color: colors.textSecondary }]}>
-            Donor ID: {donor.Donor_id}
-          </Text>
-        </View>
+        {/* Bottom Info Row */}
+        <View style={styles.infoRow}>
+          <View style={styles.infoItem}>
+            <Icon name="virus" size={16} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+              CMV: {donor.CMVStatus}
+            </Text>
+          </View>
 
-        <View style={[styles.bloodBadge, { backgroundColor: colors.success + '20' }]}>
-          <Text style={[styles.bloodText, { color: colors.success }]}>
-            {donor.BloodGroup}
-          </Text>
+          <View style={styles.infoItem}>
+            <Icon name="dna" size={16} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+              {donor.StemCellSource}
+            </Text>
+          </View>
         </View>
-      </View>
-
-      {/* Bottom Info Row */}
-      <View style={styles.infoRow}>
-        <View style={styles.infoItem}>
-          <Icon name="virus" size={16} color={colors.textSecondary} />
-          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-            CMV: {donor.CMVStatus}
-          </Text>
-        </View>
-
-        <View style={styles.infoItem}>
-          <Icon name="dna" size={16} color={colors.textSecondary} />
-          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-            {donor.StemCellSource}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView
@@ -109,11 +160,11 @@ export default function DonorProfiles({ navigation }) {
       edges={['top']}
     >
       <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-            >
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>
             Donor Profiles
@@ -146,7 +197,6 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 14, marginTop: 4 },
 
   card: {
-    borderWidth: 1,
     borderRadius: 18,
     padding: 16,
     marginBottom: 14,
@@ -174,6 +224,25 @@ const styles = StyleSheet.create({
   idText: {
     fontSize: 12,
     marginTop: 2,
+  },
+
+  rightBadges: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+
+  matchedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+
+  matchedText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
 
   bloodBadge: {

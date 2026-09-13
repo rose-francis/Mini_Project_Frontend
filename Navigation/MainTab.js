@@ -21,10 +21,10 @@ const MainTab = () => {
         if (route.name === 'Home') {
           iconName = 'home-outline';
           iconNameFocused = 'home';
-        } else if (route.name === 'Patient Profiles') {
+        } else if (route.name === 'Patients') {
           iconName = 'virus-outline';
           iconNameFocused = 'virus';
-        } else if (route.name === 'Donor Profiles') {
+        } else if (route.name === 'Donors') {
           iconName = 'heart-outline';
           iconNameFocused = 'heart';
         } else if (route.name === 'Settings') {
@@ -69,8 +69,8 @@ const MainTab = () => {
       initialRouteName="Home"
     >
       <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Patient Profiles" component={PatientProfiles} />
-      <Tab.Screen name="Donor Profiles" component={DonorProfiles} />
+      <Tab.Screen name="Patients" component={PatientProfiles} />
+      <Tab.Screen name="Donors" component={DonorProfiles} />
       <Tab.Screen name="Settings" component={Settings} />
     </Tab.Navigator>
   );
