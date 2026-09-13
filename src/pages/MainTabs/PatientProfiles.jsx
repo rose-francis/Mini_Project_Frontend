@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../Theme/ThemeContext';
+import { SUPABASE_REST_URL, SUPABASE_HEADERS } from '../../config/api';
 
 export default function PatientProfiles({ navigation }) {
   const { colors } = useAppTheme();
@@ -33,14 +34,8 @@ export default function PatientProfiles({ navigation }) {
     setLoading(true);
     const [patientsResponse, matchedIds] = await Promise.all([
       fetch(
-        'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1/Patient?select=*',
-        {
-          headers: {
-            apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE',
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE',
-          'Content-Type': 'application/json'
-          },
-        }
+        `${SUPABASE_REST_URL}/Patient?select=*`,
+        { headers: SUPABASE_HEADERS }
       ).then((res) => res.json()),
       fetchMatchedPatients(),
     ]);
@@ -62,14 +57,8 @@ export default function PatientProfiles({ navigation }) {
   const fetchMatchedPatients = async () => {
   try {
     const response = await fetch(
-      'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1/Patient-Donor?select=Patient_id',
-      {
-        headers: {
-          apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE',
-          Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE',
-          'Content-Type': 'application/json'
-        },
-      }
+      `${SUPABASE_REST_URL}/Patient-Donor?select=Patient_id`,
+      { headers: SUPABASE_HEADERS }
     );
     const data = await response.json();
     // store only the Patient IDs that have matched donors

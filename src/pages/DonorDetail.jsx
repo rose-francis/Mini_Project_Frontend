@@ -12,15 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../src/Theme/ThemeContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
-const API_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE';
-
-const BASE_HEADERS = {
-  apikey: API_KEY,
-  Authorization: `Bearer ${API_KEY}`,
-  'Content-Type': 'application/json',
-};
+import { SUPABASE_REST_URL, SUPABASE_HEADERS as BASE_HEADERS } from '../config/api';
 
 // ─── Reusable detail card ────────────────────────────────────────────────────
 const DetailCard = ({ label, value, colors, delay = 0 }) => {
@@ -207,7 +199,7 @@ export default function DonorDetail() {
     try {
       // 1. Get all Patient-Donor rows for this donor
       const matchRes = await fetch(
-        `https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1/Patient-Donor?Donor_id=eq.${donor.Donor_id}&select=*`,
+        `${SUPABASE_REST_URL}/Patient-Donor?Donor_id=eq.${donor.Donor_id}&select=*`,
         { headers: BASE_HEADERS }
       );
       const matches = await matchRes.json();
@@ -221,7 +213,7 @@ export default function DonorDetail() {
       // 2. Fetch each matched patient's full record
       const patientIds = [...new Set(matches.map((m) => m.Patient_id).filter(Boolean))];
       const patientRes = await fetch(
-        `https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1/Patient?Patient_id=in.(${patientIds.join(',')})&select=*`,
+        `${SUPABASE_REST_URL}/Patient?Patient_id=in.(${patientIds.join(',')})&select=*`,
         { headers: BASE_HEADERS }
       );
       const patients = await patientRes.json();

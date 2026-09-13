@@ -1,20 +1,9 @@
 /**
  * Disease Prediction Service
- * Handles communication with Flask backend for disease prediction
+ * Handles communication with FastAPI backend for disease prediction
  */
 
-// Configuration - Update this based on your backend URL
-const BACKEND_CONFIG = {
-  ANDROID_EMULATOR_URL: 'http://192.168.66.33:8000',
-  IOS_SIMULATOR_URL: 'http://192.168.66.33:8000',
-  PHYSICAL_DEVICE_URL: 'http://192.168.66.33:8000',
-  PRODUCTION_URL: 'http://192.168.66.33:8000',
-};
-
-// Select the appropriate URL based on your setup
-// For development: use ANDROID_EMULATOR_URL or IOS_SIMULATOR_URL
-// For testing on physical device: use PHYSICAL_DEVICE_URL
-const BACKEND_URL = BACKEND_CONFIG.PHYSICAL_DEVICE_URL; // Change this as needed
+import { BACKEND_URL } from '../config/api';
 
 /**
  * Fetch available symptoms from backend

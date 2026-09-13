@@ -16,16 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Dropdown } from 'react-native-element-dropdown';
 import DonorTabs from '../components/DonorTabs.jsx';
 import PatientDetailsSection from '../components/PatientDetailsSection.jsx';
-
-const API_URL = 'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1';
-const API_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE';
-
-const HEADERS = {
-  apikey: API_KEY,
-  Authorization: `Bearer ${API_KEY}`,
-  'Content-Type': 'application/json',
-};
+import { SUPABASE_REST_URL as API_URL, SUPABASE_HEADERS as HEADERS, BACKEND_URL } from '../config/api';
 
 const FIELD_META = {
   Name:       {label: 'FULL NAME' },
@@ -112,8 +103,6 @@ export default function DonorPredict() {
   
     fetchDonors();
   }, []);
-
-  const BACKEND_URL = "http://192.168.66.33:8000";
 
   useEffect(() => {
   setDiseaseType(patient.DiseaseType || '');

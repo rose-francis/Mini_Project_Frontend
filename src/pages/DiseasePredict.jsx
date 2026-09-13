@@ -16,16 +16,7 @@ import SymptomSelector from '../components/Multiselect';
 import { predictDisease } from '../services/diseaseService';
 import PatientDetailsSection from '../components/PatientDetailsSection';
 import DiseaseResult from '../components/DiseaseResult';
-
-// Supabase configuration
-const API_URL = 'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1';
-const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE';
-
-const HEADERS = {
-  apikey: API_KEY,
-  Authorization: `Bearer ${API_KEY}`,
-  'Content-Type': 'application/json',
-};
+import { SUPABASE_REST_URL as API_URL, SUPABASE_HEADERS as HEADERS } from '../config/api';
 
 
 const FIELD_META = {
@@ -185,7 +176,7 @@ useEffect(() => {
             // 'Low Confidence',
             // `The model confidence is below 30%. Top prediction: ${topPrediction.disease} (${topPrediction.confidence}%)`,
             // [{ text: 'OK' }]
-            'Saved selected symptoms successfully'
+            'Predictions generated successfully'
           );
         // }
 
@@ -369,7 +360,7 @@ useEffect(() => {
         disabled={loading}
       >
         <Text style={styles.submitText}>
-          {loading ? 'Processing...' : 'Save Symptoms'}
+          {loading ? 'Processing...' : 'Get Predictions'}
         </Text>
       </TouchableOpacity>
     )}
@@ -382,7 +373,7 @@ useEffect(() => {
         disabled={loading}
       >
         <Text style={styles.submitText}>
-          {loading ? 'Saving...' : 'Get Predictions'}
+          {loading ? 'Saving...' : 'Save Symptoms'}
         </Text>
       </TouchableOpacity>
     )}

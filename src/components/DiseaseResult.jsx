@@ -9,16 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAppTheme } from '../../src/Theme/ThemeContext';
-
-const API_URL = 'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1';
-const API_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE';
-
-const HEADERS = {
-  apikey: API_KEY,
-  Authorization: `Bearer ${API_KEY}`,
-  'Content-Type': 'application/json',
-};
+import { SUPABASE_REST_URL as API_URL, SUPABASE_HEADERS as HEADERS } from '../config/api';
 
 // ─── Confidence arc helpers ──────────────────────────────────────────────────
 

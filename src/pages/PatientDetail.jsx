@@ -13,16 +13,7 @@ import { useAppTheme } from '../../src/Theme/ThemeContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import DonorTabs from '../components/DonorTabs.jsx';
 import DiseaseResult from '../components/DiseaseResult.jsx';
-
-const API_URL = 'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1';
-const API_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE';
-
-const HEADERS = {
-  apikey: API_KEY,
-  Authorization: `Bearer ${API_KEY}`,
-  'Content-Type': 'application/json',
-};
+import { SUPABASE_REST_URL as API_URL, SUPABASE_HEADERS as HEADERS } from '../config/api';
 
 const DetailCard = ({ label, value, colors, delay }) => {
   const fade = useRef(new Animated.Value(0)).current;

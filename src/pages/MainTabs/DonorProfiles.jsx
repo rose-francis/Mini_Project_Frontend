@@ -11,15 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../Theme/ThemeContext';
-
-const API_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVocGluZm9nenB0enN2dWxocHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjQyNjEsImV4cCI6MjA2OTgwMDI2MX0.PrVCuwG314G4x3YW-b3p1-xHDLjcLyLbxvh4fMt_UvE';
-
-const BASE_HEADERS = {
-  apikey: API_KEY,
-  Authorization: `Bearer ${API_KEY}`,
-  'Content-Type': 'application/json',
-};
+import { SUPABASE_REST_URL, SUPABASE_HEADERS as BASE_HEADERS } from '../../config/api';
 
 export default function DonorProfiles({ navigation }) {
   const { colors } = useAppTheme();
@@ -52,7 +44,7 @@ export default function DonorProfiles({ navigation }) {
   const fetchDonors = async () => {
     try {
       const response = await fetch(
-        'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1/Donor?select=*',
+        `${SUPABASE_REST_URL}/Donor?select=*`,
         { headers: BASE_HEADERS }
       );
       return await response.json();
@@ -65,7 +57,7 @@ export default function DonorProfiles({ navigation }) {
   const fetchMatchedDonorIds = async () => {
     try {
       const response = await fetch(
-        'https://uhpinfogzptzsvulhpvr.supabase.co/rest/v1/Patient-Donor?select=Donor_id',
+        `${SUPABASE_REST_URL}/Patient-Donor?select=Donor_id`,
         { headers: BASE_HEADERS }
       );
       const data = await response.json();
