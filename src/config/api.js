@@ -1,4 +1,4 @@
-import { SUPABASE_URL, SUPABASE_KEY, BACKEND_URL } from '@env';
+import { SUPABASE_URL, SUPABASE_KEY, BACKEND_URL as ENV_BACKEND_URL } from '@env';
 
 export const SUPABASE_REST_URL = `${SUPABASE_URL}/rest/v1`;
 
@@ -8,4 +8,4 @@ export const SUPABASE_HEADERS = {
   'Content-Type': 'application/json',
 };
 
-export { BACKEND_URL };
+export const BACKEND_URL = ENV_BACKEND_URL;
