@@ -36,7 +36,7 @@ export default function AddDonor({ navigation }) {
 
   const hlaAOptions = [
   { label: '01:01', value: '01:01' },
-  { label: '02:02', value: '02:01' },
+  { label: '02:01', value: '02:01' },
   { label: '03:01', value: '03:01' },
   { label: '24:02', value: '24:02' },
   { label: '11:01', value: '11:01' },
